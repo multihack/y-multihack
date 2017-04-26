@@ -1,0 +1,23 @@
+{
+  "name": "y-multihack",
+  "version": "0.0.2",
+  "description": "Multihack's Y-JS connector.",
+  "main": "src/index.js",
+  "scripts": {
+    "build": "browserify src/index.js -s Y-Multihack -o dist/y-multihack.js",
+    "watch": "watchify src/index.js -s Y-Multihack -o dist/y-multihack.js"
+  },
+  "author": "Thomas Mullen",
+  "license": "MIT",
+  "dependencies": {
+    "get-browser-rtc": "^1.0.2",
+    "multihack-wire": "^2.0.0",
+    "simple-signal-client": "^1.2.6",
+    "socket.io-client": "^1.7.3",
+    "stream-throttle": "^0.1.3",
+    "yjs": "^12.1.7"
+  },
+  "peerDependencies": {
+    "yjs": "^9.0.0 || ^10.0.0 || ^11.0.0 || ^12.0.0"
+  }
+}
