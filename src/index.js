@@ -124,6 +124,15 @@ Connector.prototype._setupP2P = function (room, nickname) {
     // throttle outgoing
     var throttle = new Throttle({rate:300*1000, chunksize: 15*1000})
     peer.wire = new Wire()
+    peer.originalSend = peer.send
+    peer.send = function (chunk) {
+      try {
+        peer.originalSend(chunk)
+      } catch (e) {
+        peer.send(chunk)
+      }
+    }
+    
     peer.pipe(peer.wire).pipe(throttle).pipe(peer)
     
     self.peers.push(peer)
