@@ -88,6 +88,7 @@ Connector.prototype._setupP2P = function (room, nickname) {
   self._client = new SimpleSignalClient(self._socket, {
     room: self.room
   })
+  self.events('client', self._client)
   
   self._client.on('ready', function (peerIDs) {   
 
