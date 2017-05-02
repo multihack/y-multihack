@@ -257,7 +257,8 @@ Connector.prototype.disconnect = function () {
   self.voice = null
   self._client = null
   self.nop2p = null
-  self.peers = null
+  self.peers = []
+  self.events('peers', self.peers)
   self._handlers = null
   self._socket.disconnect()
   self._socket = null
@@ -268,6 +269,7 @@ Connector.prototype.reconnect = function () {
   
   self._socket = new Io(self.hostname)
   self.peers = []
+  self.events('peers', self.peers)
   self.mustForward = 0 // num of peers that are nop2p
 
   self._setupSocket()
