@@ -23,6 +23,7 @@ class Connector extends Y.AbstractConnector {
     self.events = opts.events || function (event, value) {}
     self.id = null
     self.queue = []
+    self.peers = []
 
     self.reconnect()
   }
