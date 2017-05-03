@@ -72,7 +72,7 @@ Connector.prototype._setupSocket = function () {
   self._socket.on('id', function (id) {
     if (self.id) return
     self.id = id
-    self.events('ready', {
+    self.events('id', {
       id: self.id,
       nop2p: self.nop2p
     })
@@ -104,7 +104,7 @@ Connector.prototype._setupP2P = function (room, nickname) {
     if (!self.id) {
       self.setUserId(self._client.id)
       self.id = self._client.id
-      self.events('ready', {
+      self.events('id', {
         id: self.id,
         nop2p: self.nop2p
       })
