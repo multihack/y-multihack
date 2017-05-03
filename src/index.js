@@ -71,7 +71,10 @@ Connector.prototype._setupSocket = function () {
   self._socket.on('id', function (id) {
     if (self.id) return
     self.id = id
-    self.events('id', self.id)
+    self.events('ready', {
+      id: self.id,
+      nop2p: self.nop2p
+    })
     self.setUserId(id)
     
     self._socket.emit('join', {
@@ -100,7 +103,10 @@ Connector.prototype._setupP2P = function (room, nickname) {
     if (!self.id) {
       self.setUserId(self._client.id)
       self.id = self._client.id
-      self.events('id', self.id)
+      self.events('ready', {
+        id: self.id,
+        nop2p: self.nop2p
+      })
     }
     
     for (var i=0; i<peerIDs.length; i++) {
@@ -230,7 +236,10 @@ Connector.prototype._sendOnePeer = function (id, event, message) {
 Connector.prototype._onGotPeer = function (peer) {
   var self = this
   
-  self.events('peers', self.peers)
+  self.events('peers', {
+    peers: self.peers,
+    mustForward: self.mustForward
+  })
   self.events('gotPeer', peer)
   self.userJoined(peer.id, 'master')
 }
@@ -238,7 +247,10 @@ Connector.prototype._onGotPeer = function (peer) {
 Connector.prototype._onLostPeer = function (peer) {
   var self = this
   
-  self.events('peers', self.peers)
+  self.events('peers', {
+    peers: self.peers,
+    mustForward: self.mustForward
+  })
   self.events('lostPeer', peer)
   self.userLeft(peer.id)
 }
