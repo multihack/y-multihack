@@ -224,6 +224,7 @@ Connector.prototype._sendOnePeer = function (id, event, message) {
     if (self.peers[i].id !== id) continue
     if (self.peers[i].nop2p) {
       self._socket.emit('forward', {
+        target: id,
         event: event,
         message: message
       })
