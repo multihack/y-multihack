@@ -23002,6 +23002,7 @@ class Connector extends Y.AbstractConnector {
     self.events = opts.events || function (event, value) {}
     self.id = null
     self.queue = []
+    self.peers = []
 
     self.reconnect()
   }
@@ -23050,7 +23051,7 @@ Connector.prototype._setupSocket = function () {
   self._socket.on('id', function (id) {
     if (self.id) return
     self.id = id
-    self.events('ready', {
+    self.events('id', {
       id: self.id,
       nop2p: self.nop2p
     })
@@ -23082,7 +23083,7 @@ Connector.prototype._setupP2P = function (room, nickname) {
     if (!self.id) {
       self.setUserId(self._client.id)
       self.id = self._client.id
-      self.events('ready', {
+      self.events('id', {
         id: self.id,
         nop2p: self.nop2p
       })
@@ -23090,7 +23091,10 @@ Connector.prototype._setupP2P = function (room, nickname) {
     
     for (var i=0; i<peerIDs.length; i++) {
       if (peerIDs[i] === self._client.id) continue
-      self._client.connect(peerIDs[i], {wrtc:self.wrtc}, {
+      self._client.connect(peerIDs[i], {
+        wrtc:self.wrtc,
+        reconnectTimer: 100
+      }, {
         nickname: self.nickname
       })
     }
@@ -23098,7 +23102,10 @@ Connector.prototype._setupP2P = function (room, nickname) {
   
   self._client.on('request', function (request) {
     if (request.metadata.voice) return
-    request.accept({wrtc:self.wrtc}, {
+    request.accept({
+      wrtc:self.wrtc,
+      reconnectTimer: 100
+    }, {
       nickname: self.nickname
     })
   })
@@ -23202,6 +23209,7 @@ Connector.prototype._sendOnePeer = function (id, event, message) {
     if (self.peers[i].id !== id) continue
     if (self.peers[i].nop2p) {
       self._socket.emit('forward', {
+        target: id,
         event: event,
         message: message
       })
@@ -23249,7 +23257,10 @@ Connector.prototype.disconnect = function () {
   self._client = null
   self.nop2p = null
   self.peers = []
-  self.events('peers', self.peers)
+  self.events('peers', {
+    peers: self.peers,
+    mustForward: self.mustForward
+  })
   self._handlers = null
   self._socket.disconnect()
   self._socket = null
@@ -23260,7 +23271,10 @@ Connector.prototype.reconnect = function () {
   
   self._socket = new Io(self.hostname)
   self.peers = []
-  self.events('peers', self.peers)
+  self.events('peers', {
+    peers: self.peers,
+    mustForward: self.mustForward
+  })
   self.mustForward = 0 // num of peers that are nop2p
 
   self._setupSocket()

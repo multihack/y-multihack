@@ -112,7 +112,10 @@ Connector.prototype._setupP2P = function (room, nickname) {
     
     for (var i=0; i<peerIDs.length; i++) {
       if (peerIDs[i] === self._client.id) continue
-      self._client.connect(peerIDs[i], {wrtc:self.wrtc}, {
+      self._client.connect(peerIDs[i], {
+        wrtc:self.wrtc,
+        reconnectTimer: 100
+      }, {
         nickname: self.nickname
       })
     }
@@ -120,7 +123,10 @@ Connector.prototype._setupP2P = function (room, nickname) {
   
   self._client.on('request', function (request) {
     if (request.metadata.voice) return
-    request.accept({wrtc:self.wrtc}, {
+    request.accept({
+      wrtc:self.wrtc,
+      reconnectTimer: 100
+    }, {
       nickname: self.nickname
     })
   })
