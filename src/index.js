@@ -178,7 +178,9 @@ Connector.prototype._setupP2P = function (room, nickname) {
       self._destroyPeer(peer)
     })
     
-    
+    peer.on('error', function (err) {
+      console.error(err)
+    })
   })
 }
 

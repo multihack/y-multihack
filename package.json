@@ -12,6 +12,7 @@
   "dependencies": {
     "get-browser-rtc": "^1.0.2",
     "multihack-wire": "^2.0.0",
+    "simple-peer": "^8.1.1",
     "simple-signal-client": "^1.2.6",
     "socket.io-client": "^1.7.3",
     "stream-throttle": "^0.1.3",
