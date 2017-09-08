@@ -39,20 +39,17 @@ Connector.prototype._setupSocket = function () {
     }
   })
   
-  self._socket.on('peer-join', function (data) {
-    if (!self.nop2p && !data.nop2p) return // will connect p2p
-    
+  self._socket.on('peer-join', function (data) {    
     var fakePeer = {
       metadata: {
         nickname: data.nickname
       },
       id: data.id,
-      nop2p: data.nop2p
+      nop2p: data.nop2p,
+      connected: false
     }
-    self.peers.push(fakePeer)
     
-    if (data.nop2p) self.mustForward++
-  
+    self.mustForward++
     self._onGotPeer(fakePeer)
   })
   
@@ -148,29 +145,14 @@ Connector.prototype._setupP2P = function (room, nickname) {
     }
     
     peer.pipe(peer.wire).pipe(throttle).pipe(peer)
-    
-    self.peers.push(peer)
 
     peer.wire.on('yjs', function (message) {
-      if (peer.connected)  {
-        self.receiveMessage(peer.id, message)
-      } else {
-        if (!peer.destroyed) {
-          self.queue.push({
-            id: peer.id,
-            message: message
-          })
-        }
-      }
+      self.receiveMessage(peer.id, message)
     })
 
     peer.on('connect', function () {
+      self.mustForward--
       self._onGotPeer(peer)
-      self.queue.forEach(function (a) {
-        if (a.id === peer.id) {
-          self.receiveMessage(a.id, a.message)
-        }
-      })
     }) 
     
     peer.on('close', function () {
@@ -230,7 +212,7 @@ Connector.prototype._sendOnePeer = function (id, event, message) {
   
   for (var i=0; i<self.peers.length; i++) {
     if (self.peers[i].id !== id) continue
-    if (self.peers[i].nop2p) {
+    if (self.peers[i].nop2p || !self.peers[i].connected) {
       self._socket.emit('forward', {
         target: id,
         event: event,
@@ -246,12 +228,25 @@ Connector.prototype._sendOnePeer = function (id, event, message) {
 Connector.prototype._onGotPeer = function (peer) {
   var self = this
   
+  var isNew = true
+  for (var i=0; i<self.peers.length; i++) {
+    if (self.peers[i].id === peer.id) {
+      self.peers[i] = peer // replace old peer
+      isNew = false
+      console.log('upgraded peer ', peer.id)
+      break
+    }
+  }
+  
   self.events('peers', {
     peers: self.peers,
     mustForward: self.mustForward
   })
   self.events('gotPeer', peer)
-  self.userJoined(peer.id, 'master')
+  if (isNew) {
+    self.userJoined(peer.id, 'master')
+    self.peers.push(peer)
+  }
 }
 
 Connector.prototype._onLostPeer = function (peer) {
